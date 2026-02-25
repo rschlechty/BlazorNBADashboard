@@ -15,24 +15,24 @@ public class NbaApiService
         _httpClient.DefaultRequestHeaders.Add("Authorization", configuration["BallDontLieApi:ApiKey"]);
     }
 
-    public async Task<List<Game>> GetGamesByDateAsync(DateOnly date)
+    public async Task<List<GameData>> GetGamesByDateAsync(DateOnly date)
     {
         var response = await _httpClient.GetAsync($"/nba/v1/games?dates[]={date:yyyy-MM-dd}");
         response.EnsureSuccessStatusCode();
 
         var json = await response.Content.ReadAsStringAsync();
-        var result = JsonSerializer.Deserialize<ApiResponse<Game>>(json);
+        var result = JsonSerializer.Deserialize<ApiResponse<GameData>>(json);
 
-        return result?.Data ?? new List<Game>();
+        return result?.Data ?? new List<GameData>();
     }
 
-    public async Task<Game?> GetGameByIdAsync(int id)
+    public async Task<GameData?> GetGameByIdAsync(int id)
     {
         var response = await _httpClient.GetAsync($"/nba/v1/games/{id}");
         response.EnsureSuccessStatusCode();
 
         var json = await response.Content.ReadAsStringAsync();
-        var result = JsonSerializer.Deserialize<SingleApiResponse<Game>>(json);
+        var result = JsonSerializer.Deserialize<SingleApiResponse<GameData>>(json);
 
         return result?.Data;
     }

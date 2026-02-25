@@ -2,7 +2,7 @@
 
 namespace BlazorNBADashboard.Models;
 
-public class Team
+public class TeamData
 {
     [JsonPropertyName("id")]
     public int Id { get; set; }

@@ -2,7 +2,7 @@
 
 namespace BlazorNBADashboard.Models;
 
-public class Game
+public class GameData
 {
     [JsonPropertyName("id")]
     public int Id { get; set; }
@@ -29,10 +29,10 @@ public class Game
     public int VisitorTeamScore { get; set; }
 
     [JsonPropertyName("home_team")]
-    public Team HomeTeam { get; set; } = new();
+    public TeamData HomeTeam { get; set; } = new();
 
     [JsonPropertyName("visitor_team")]
-    public Team VisitorTeam { get; set; } = new();
+    public TeamData VisitorTeam { get; set; } = new();
 
     [JsonPropertyName("home_q1")]
     public int? HomeQ1 { get; set; }
