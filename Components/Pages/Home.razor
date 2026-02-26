@@ -3,8 +3,16 @@
 @using BlazorNBADashboard.Models
 @inject NbaApiService NbaApi
 @rendermode InteractiveServer
+@using BlazorNBADashboard.Components.Shared
 
 <h1>NBA Games</h1>
+
+<div class="d-flex align-items-center gap-2 mb-3">
+    <button class="btn btn-outline-secondary btn-sm" @onclick="PreviousDay">&lt;</button>
+    <input type="date" class="form-control" style="width: auto;" value="@_selectedDate.ToString("yyyy-MM-dd")" @onchange="OnDateChanged" />
+    <button class="btn btn-outline-secondary btn-sm" @onclick="NextDay">&gt;</button>
+    <button class="btn btn-outline-primary btn-sm" @onclick="GoToToday">Today</button>
+</div>
 
 @if (_loading)
 {
@@ -12,23 +20,69 @@
 }
 else if (_games.Any())
 {
-    @foreach (var game in _games)
+ @foreach (var game in _games)
     {
-        <p>@game.VisitorTeam.Abbreviation @game.VisitorTeamScore - @game.HomeTeamScore @game.HomeTeam.Abbreviation (@game.Status)</p>
+        <GameCard Game="game" OnClick="() => GoToGame(game.Id)" />
     }
 }
 else
 {
-    <p>No games found.</p>
+    <p>No games found for @_selectedDate.ToString("MMMM dd, yyyy").</p>
 }
 
 @code {
     private List<GameData> _games = new();
     private bool _loading = true;
+    private DateOnly _selectedDate = DateOnly.FromDateTime(DateTime.Today);
 
-    protected override async Task OnInitializedAsync()
+    private bool _firstRender = true;
+    //switched to afterRender from OnInitial to fire only once to save api calls
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        _games = await NbaApi.GetGamesByDateAsync(DateOnly.FromDateTime(DateTime.Today));
+        if (firstRender)
+        {
+            await LoadGames();
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadGames()
+    {
+        _loading = true;
+        _games = await NbaApi.GetGamesByDateAsync(_selectedDate);
         _loading = false;
+    }
+
+    private async Task OnDateChanged(ChangeEventArgs e)
+    {
+        if (DateOnly.TryParse(e.Value?.ToString(), out var date))
+        {
+            _selectedDate = date;
+            await LoadGames();
+        }
+    }
+
+    private async Task PreviousDay()
+    {
+        _selectedDate = _selectedDate.AddDays(-1);
+        await LoadGames();
+    }
+
+    private async Task NextDay()
+    {
+        _selectedDate = _selectedDate.AddDays(1);
+        await LoadGames();
+    }
+
+    private async Task GoToToday()
+    {
+        _selectedDate = DateOnly.FromDateTime(DateTime.Today);
+        await LoadGames();
+    }
+    @inject NavigationManager Navigation
+
+    private void GoToGame(int gameId)
+    {
+        Navigation.NavigateTo($"/game/{gameId}");
     }
 }

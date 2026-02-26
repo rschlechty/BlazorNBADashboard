@@ -1,0 +1,88 @@
+﻿@page "/game/{GameId:int}"
+@using BlazorNBADashboard.Services
+@using BlazorNBADashboard.Models
+@inject NbaApiService NbaApi
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<button class="btn btn-outline-secondary btn-sm mb-3" @onclick="GoBack">← Back</button>
+
+@if (_loading)
+{
+    <p>Loading...</p>
+}
+else if (_game is not null)
+{
+    <div class="card">
+        <div class="card-header text-center">
+            <h4>@_game.VisitorTeam?.FullName vs @_game.HomeTeam?.FullName</h4>
+            <span class="text-muted">@_game.Date — @_game.Status</span>
+        </div>
+        <div class="card-body">
+            <div class="d-flex justify-content-around text-center mb-4">
+                <div>
+                    <h5>@_game.VisitorTeam?.Abbreviation</h5>
+                    <h2>@_game.VisitorTeamScore</h2>
+                </div>
+                <div>
+                    <h5>@_game.HomeTeam?.Abbreviation</h5>
+                    <h2>@_game.HomeTeamScore</h2>
+                </div>
+            </div>
+
+            <table class="table table-sm table-bordered text-center">
+                <thead>
+                    <tr>
+                        <th>Team</th>
+                        <th>Q1</th>
+                        <th>Q2</th>
+                        <th>Q3</th>
+                        <th>Q4</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>@_game.VisitorTeam?.Abbreviation</strong></td>
+                        <td>@_game.VisitorQ1</td>
+                        <td>@_game.VisitorQ2</td>
+                        <td>@_game.VisitorQ3</td>
+                        <td>@_game.VisitorQ4</td>
+                        <td><strong>@_game.VisitorTeamScore</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>@_game.HomeTeam?.Abbreviation</strong></td>
+                        <td>@_game.HomeQ1</td>
+                        <td>@_game.HomeQ2</td>
+                        <td>@_game.HomeQ3</td>
+                        <td>@_game.HomeQ4</td>
+                        <td><strong>@_game.HomeTeamScore</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+else
+{
+    <p>Game not found.</p>
+}
+
+@code {
+    [Parameter]
+    public int GameId { get; set; }
+
+    private GameData? _game;
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _game = await NbaApi.GetGameByIdAsync(GameId);
+        _loading = false;
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/");
+    }
+}
