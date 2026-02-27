@@ -66,6 +66,30 @@ public class NbaApiService
 
         return game;
     }
+    private readonly Dictionary<int, List<PlayerStats>> _statsCache = new();
+
+    public async Task<List<PlayerStats>> GetGameStatsAsync(int gameId)
+    {
+        if (_statsCache.ContainsKey(gameId))
+        {
+            return _statsCache[gameId];
+        }
+
+        var response = await _httpClient.GetAsync($"/nba/v1/stats?game_ids[]={gameId}");
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return new List<PlayerStats>();
+        }
+
+        var json = await response.Content.ReadAsStringAsync();
+        var result = JsonSerializer.Deserialize<ApiResponse<PlayerStats>>(json);
+        var stats = result?.Data ?? new List<PlayerStats>();
+
+        _statsCache[gameId] = stats;
+
+        return stats;
+    }
 }
 public class SingleApiResponse<T>
 {

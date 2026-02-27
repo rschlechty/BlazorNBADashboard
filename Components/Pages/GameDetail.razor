@@ -16,7 +16,7 @@ else if (_game is not null)
     <div class="card">
         <div class="card-header text-center">
             <h4>@_game.VisitorTeam?.FullName vs @_game.HomeTeam?.FullName</h4>
-            <span class="text-muted">@_game.Date — @_game.Status</span>
+            <span class="text-muted">@_game.Date — @FormatStatus(_game.Status)</span>
         </div>
         <div class="card-body">
             <div class="d-flex justify-content-around text-center mb-4">
@@ -29,7 +29,6 @@ else if (_game is not null)
                     <h2>@_game.HomeTeamScore</h2>
                 </div>
             </div>
-
             <table class="table table-sm table-bordered text-center">
                 <thead>
                     <tr>
@@ -62,6 +61,95 @@ else if (_game is not null)
             </table>
         </div>
     </div>
+
+    @if (_visitorStats.Any() || _homeStats.Any())
+    {
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5>@_game.VisitorTeam?.FullName</h5>
+            </div>
+            <div class="card-body table-responsive">
+                <table class="table table-sm table-striped text-center">
+                    <thead>
+                        <tr>
+                            <th class="text-start">Player</th>
+                            <th>MIN</th>
+                            <th>PTS</th>
+                            <th>REB</th>
+                            <th>AST</th>
+                            <th>STL</th>
+                            <th>BLK</th>
+                            <th>TO</th>
+                            <th>FG</th>
+                            <th>3PT</th>
+                            <th>FT</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var stat in _visitorStats)
+                        {
+                            <tr>
+                                <td class="text-start">@stat.Player.FirstName @stat.Player.LastName</td>
+                                <td>@stat.Min</td>
+                                <td>@stat.Pts</td>
+                                <td>@stat.Reb</td>
+                                <td>@stat.Ast</td>
+                                <td>@stat.Stl</td>
+                                <td>@stat.Blk</td>
+                                <td>@stat.Turnover</td>
+                                <td>@stat.Fgm-@stat.Fga</td>
+                                <td>@stat.Fg3m-@stat.Fg3a</td>
+                                <td>@stat.Ftm-@stat.Fta</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5>@_game.HomeTeam?.FullName</h5>
+            </div>
+            <div class="card-body table-responsive">
+                <table class="table table-sm table-striped text-center">
+                    <thead>
+                        <tr>
+                            <th class="text-start">Player</th>
+                            <th>MIN</th>
+                            <th>PTS</th>
+                            <th>REB</th>
+                            <th>AST</th>
+                            <th>STL</th>
+                            <th>BLK</th>
+                            <th>TO</th>
+                            <th>FG</th>
+                            <th>3PT</th>
+                            <th>FT</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var stat in _homeStats)
+                        {
+                            <tr>
+                                <td class="text-start">@stat.Player.FirstName @stat.Player.LastName</td>
+                                <td>@stat.Min</td>
+                                <td>@stat.Pts</td>
+                                <td>@stat.Reb</td>
+                                <td>@stat.Ast</td>
+                                <td>@stat.Stl</td>
+                                <td>@stat.Blk</td>
+                                <td>@stat.Turnover</td>
+                                <td>@stat.Fgm-@stat.Fga</td>
+                                <td>@stat.Fg3m-@stat.Fg3a</td>
+                                <td>@stat.Ftm-@stat.Fta</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
 }
 else
 {
@@ -73,16 +161,35 @@ else
     public int GameId { get; set; }
 
     private GameData? _game;
+    private List<PlayerStats> _visitorStats = new();
+    private List<PlayerStats> _homeStats = new();
     private bool _loading = true;
 
     protected override async Task OnInitializedAsync()
     {
         _game = await NbaApi.GetGameByIdAsync(GameId);
+
+        if (_game is not null)
+        {
+            var allStats = await NbaApi.GetGameStatsAsync(GameId);
+            _visitorStats = allStats.Where(s => s.Team.Id == _game.VisitorTeam?.Id).OrderByDescending(s => s.Pts).ToList();
+            _homeStats = allStats.Where(s => s.Team.Id == _game.HomeTeam?.Id).OrderByDescending(s => s.Pts).ToList();
+        }
+
         _loading = false;
     }
 
     private void GoBack()
     {
         Navigation.NavigateTo("/");
+    }
+
+    private string FormatStatus(string status)
+    {
+        if (DateTime.TryParse(status, out var dateTime))
+        {
+            return dateTime.ToLocalTime().ToString("h:mm tt") + " EST";
+        }
+        return status;
     }
 }
