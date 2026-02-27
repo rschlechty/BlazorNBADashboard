@@ -1,6 +1,6 @@
 ﻿@using BlazorNBADashboard.Models
 
-<div class="card mb-2" style="cursor: pointer;" @onclick="OnClick">
+<div class="card mb-2 game-card" @onclick="OnClick">
     <div class="card-body">
         <div class="d-flex justify-content-between align-items-center">
             <div class="text-center" style="width: 40%;">
@@ -14,6 +14,9 @@
                 <strong>@Game.HomeTeam?.Abbreviation</strong>
                 <h3>@Game.HomeTeamScore</h3>
             </div>
+        </div>
+        <div class="text-center mt-2">
+            <small class="text-muted view-details">View Box Score →</small>
         </div>
     </div>
 </div>
