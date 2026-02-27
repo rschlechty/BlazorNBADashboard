@@ -36,3 +36,14 @@ A Blazor Server application that displays NBA game scores, schedules, and player
 
 - The free API tier allows 5 requests per minute. Caching is implemented to reduce redundant calls.
 - Player box scores require the ALL-STAR tier ($9.99/mo).
+
+## Demo
+
+### Games Page
+![Games Page](Screenshots/HomePage.png)
+
+### Game Detail with Box Score
+![Game Detail](Screenshots/GameStats.png)
+
+### Video Walkthrough
+A full demo recording is available in the [screenshots folder](Screenshots/NbaDashboardDemo.mp4).
